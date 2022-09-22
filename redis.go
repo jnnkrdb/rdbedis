@@ -7,7 +7,7 @@ import (
 	// go get github.com/go-redis/redis
 	"github.com/go-redis/redis"
 
-	"github.com/jnnkrdb/jlog"
+	"github.com/jnnkrdb/corerdb/prtcl"
 )
 
 // Struct of the redis-configuration as json.
@@ -48,7 +48,7 @@ func (rds Redis) getUnencodedPW() string {
 // connect to the redis from the config
 func (rds *Redis) Connect() {
 
-	jlog.Log.Println("connecting to redis")
+	prtcl.Log.Println("connecting to redis")
 
 	rds.client = redis.NewClient(&redis.Options{
 		Addr:     rds.URI + ":" + rds.Port,
@@ -62,17 +62,17 @@ func (rds *Redis) Connect() {
 // check the connection to redis
 func (rds *Redis) CheckConnection() error {
 
-	jlog.Log.Println("checking connection")
+	prtcl.Log.Println("checking connection")
 
 	if pong, err := rds.client.Ping().Result(); err != nil {
 
-		jlog.PrintObject(rds, pong, err)
+		prtcl.PrintObject(rds, pong, err)
 
 		return err
 
 	} else {
 
-		jlog.Log.Println("connection established")
+		prtcl.Log.Println("connection established")
 
 		return nil
 	}
@@ -89,11 +89,11 @@ func (rds *Redis) CheckConnection() error {
 //   - `expirationtime` : int > expiration time of the key-value-pair, 0 means it does not expire
 func (rds Redis) Add(key, value string, expirationtime int) error {
 
-	jlog.Log.Println("adding key:value [duration] to redis", rds.URI, rds.DBIndex)
+	prtcl.Log.Println("adding key:value [duration] to redis", rds.URI, rds.DBIndex)
 
 	if err := rds.CheckConnection(); err != nil {
 
-		jlog.Log.Println("not connected to", rds.URI)
+		prtcl.Log.Println("not connected to", rds.URI)
 
 		return err
 
@@ -101,9 +101,9 @@ func (rds Redis) Add(key, value string, expirationtime int) error {
 
 		if err := rds.client.Set(key, value, time.Duration(expirationtime)); err != nil {
 
-			jlog.Log.Println("error while adding key:value [duration]")
+			prtcl.Log.Println("error while adding key:value [duration]")
 
-			jlog.PrintObject(rds, err)
+			prtcl.PrintObject(rds, err)
 		}
 
 		return nil
@@ -116,11 +116,11 @@ func (rds Redis) Add(key, value string, expirationtime int) error {
 //   - `key` : string > used to address the value
 func (rds Redis) Read(key string) (string, error) {
 
-	jlog.Log.Println("reading key from redis", rds.URI, rds.DBIndex)
+	prtcl.Log.Println("reading key from redis", rds.URI, rds.DBIndex)
 
 	if err := rds.CheckConnection(); err != nil {
 
-		jlog.Log.Println("not connected to", rds.URI)
+		prtcl.Log.Println("not connected to", rds.URI)
 
 		return "", err
 
@@ -128,9 +128,9 @@ func (rds Redis) Read(key string) (string, error) {
 
 		if result, err := rds.client.Get(key).Result(); err != nil {
 
-			jlog.Log.Println("error while reading key", key)
+			prtcl.Log.Println("error while reading key", key)
 
-			jlog.PrintObject(rds, result, err)
+			prtcl.PrintObject(rds, result, err)
 
 			return "", err
 
